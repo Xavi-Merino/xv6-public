@@ -43,6 +43,12 @@ sys_getpid(void)
 }
 
 int
+sys_hello(void)
+{
+  cprintf("hello from the kernel\n");
+  return 0;
+}
+int
 sys_sbrk(void)
 {
   int addr;
