@@ -252,11 +252,7 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-<<<<<<< HEAD
-	printf.c umalloc.c hello.c\
-=======
-	printf.c umalloc.c filesize.c\
->>>>>>> 9bb96406838b5b58ee8262f7624e2ef44c8b4c36
+	printf.c umalloc.c hello.c filesize.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 
