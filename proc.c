@@ -543,7 +543,7 @@ getprocs(void)
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
-     if(p->state != (UNUSED| EMBRYO| ZOMBIE) )
+     if(p->state != (UNUSED , EMBRYO , ZOMBIE) )
         count++;
   }
 
