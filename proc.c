@@ -543,14 +543,8 @@ getprocs(void)
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
-     if(p->state != (UNUSED))
+     if(p->state != (UNUSED) && p->state != (EMBRYO) && p->state != (ZOMBIE) )
         count++;
-        
-      else if(p->state != (EMBRYO))
-        count++;
-        
-      else if(p->state != (ZOMBIE))
-        count++; 
   }
 
   release(&ptable.lock);
