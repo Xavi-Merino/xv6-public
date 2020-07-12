@@ -7,6 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -531,4 +532,25 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+//funcion que muestra tabla con informacion de los procesos
+int
+cps()
+{
+  struct proc *p;
+  sti();
+  // ciclo for para recorrer la tabla de procesos 
+  acquire(&ptable.lock);
+  cprintf("NOMBRE \t PID \t ESTADO \t \n");
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->state == SLEEPING)
+      cprintf("%s \t %d  \t SLEEPING \n", p->name , p->pid);
+    else if (p->state == RUNNING)
+      cprintf("%s \t %d  \t RUNNING \n", p->name , p->pid);
+      else if (p->state == RUNNABLE)
+        cprintf("%s \t %d  \t RUNNABLE \n", p->name , p->pid);
+
+  }
+  release(&ptable.lock);
+  return 22;
 }
