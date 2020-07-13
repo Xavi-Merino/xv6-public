@@ -101,3 +101,11 @@ sys_getprocs(void)
 { 
   return getprocs();
 }
+
+char*
+sys_addr_translation(char *s)
+{
+  argstr(0, &s);
+  addr_translate(s);
+  return s;
+}

@@ -551,3 +551,34 @@ getprocs(void)
 
  return count;
 }
+
+int
+addr_translate(char* virtual_address)
+{
+  char physical_address;
+  pde_t *pgdir,*pgtab,*pde;
+
+  //must initialise pgdir
+
+  pde = &pgdir[PDX(virtual_address)];
+  if(*pde & PTE_P){
+  pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
+  }
+    else
+    {
+    cprintf("\n PTE Not Present! - Invalid Virtual address\n");
+     return -1;
+     }
+   cprintf("\n ----------------- \n");
+   cprintf(" Page Directory Entry (PDE): %d\n",*pde);
+   cprintf(" PTE_P : %d\n",PTE_P);
+   cprintf("\n ----------------- \n");
+    //uva2ka
+  pte_t *pte;
+   pte = &pgtab[PTX(virtual_address)];
+   physical_address = (char*)P2V(PTE_ADDR(*pte));
+
+   cprintf(" --PHYSICAL ADDRESS-- %d\n",physical_address);
+    return 0;
+
+   }
