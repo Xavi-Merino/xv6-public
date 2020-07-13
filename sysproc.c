@@ -103,9 +103,8 @@ sys_getprocs(void)
 }
 
 char*
-sys_addr_translation(char *s)
+sys_addr_translation(void)
 {
-  argstr(0, &s);
-  addr_translate(s);
-  return s;
-}
+  uint *s;
+  return addr_translate(s);
+} 

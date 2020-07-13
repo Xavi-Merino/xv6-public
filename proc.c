@@ -553,32 +553,36 @@ getprocs(void)
 }
 
 int
-addr_translate(char* virtual_address)
+addr_translate(uint* virtual_address)
 {
-  char physical_address;
-  pde_t *pgdir,*pgtab,*pde;
+  struct proc *p = myproc();
+  acquire(&ptable.lock);
 
-  //must initialise pgdir
+  uint *physical_address;
+  pde_t  *pgtab ,*pde;
 
-  pde = &pgdir[PDX(virtual_address)];
+  pde = &((p->pgdir)[PDX(virtual_address)]);
   if(*pde & PTE_P){
-  pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
-  }
-    else
-    {
-    cprintf("\n PTE Not Present! - Invalid Virtual address\n");
-     return -1;
-     }
-   cprintf("\n ----------------- \n");
-   cprintf(" Page Directory Entry (PDE): %d\n",*pde);
-   cprintf(" PTE_P : %d\n",PTE_P);
-   cprintf("\n ----------------- \n");
-    //uva2ka
+   pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
+    }
+  else{
+   cprintf("\n PTE no existe! - direccion virtual invalida\n");
+   return -1;
+    }
+  cprintf("\n ----------------- \n");
+  cprintf(" Page Directory Entry (PDE): %d\n",*pde);
+  cprintf(" PTE_P : %d\n",PTE_P);
+  cprintf("\n ----------------- \n");
+   //uva2ka
   pte_t *pte;
-   pte = &pgtab[PTX(virtual_address)];
-   physical_address = (char*)P2V(PTE_ADDR(*pte));
+    pte = &pgtab[PTX(virtual_address)];
+    physical_address = (uint*)P2V(PTE_ADDR(*pte));
 
-   cprintf(" --PHYSICAL ADDRESS-- %d\n",physical_address);
-    return 0;
+    cprintf(" --PHYSICAL ADDRESS-- %d\n",physical_address);
+
+    release(&ptable.lock);
+   
+  return 0;
+    
 
    }

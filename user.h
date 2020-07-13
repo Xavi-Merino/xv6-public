@@ -25,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int hello(void);
 int getprocs(void);
+int addr_translation(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

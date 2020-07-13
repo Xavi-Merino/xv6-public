@@ -22,3 +22,4 @@
 #define SYS_close  21
 #define SYS_hello  22
 #define SYS_getprocs 23
+#define SYS_addr_translation 24
