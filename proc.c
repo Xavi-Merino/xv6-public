@@ -572,8 +572,7 @@ addr_translate(uint* virtual_address)
   cprintf("\n ----------------- \n");
   cprintf(" Page Directory Entry (PDE): %d\n",*pde);
   cprintf(" PTE_P : %d\n",PTE_P);
-  cprintf("\n ----------------- \n");
-   //uva2ka
+  cprintf("\n ----------------- \n"); 
   pte_t *pte;
     pte = &pgtab[PTX(virtual_address)];
     physical_address = (uint*)P2V(PTE_ADDR(*pte));
