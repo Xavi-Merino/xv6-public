@@ -8,10 +8,14 @@ struct cpu {
   int ncli;                    // Depth of pushcli nesting.
   int intena;                  // Were interrupts enabled before pushcli?
   struct proc *proc;           // The process running on this cpu or null
+  struct cpu *cpu;             // almacenamiento de variable en cpu
 };
 
 extern struct cpu cpus[NCPU];
 extern int ncpu;
+//variables de cada cpu, almacenan punteros a la cpu y proceso actual
+extern struct cpu *cpu asm("%gs:0");   // 
+extern struct proc *proc asm("%gs:4"); //
 
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
@@ -49,6 +53,7 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  int tickets;                 //numero de ticket del proceso
 };
 
 // Process memory is laid out contiguously, low addresses first:

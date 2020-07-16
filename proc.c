@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "rand.h"
 
 
 struct {
@@ -89,6 +90,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->tickets = 15;    //tickets por defeceto
 
   release(&ptable.lock);
 
@@ -312,6 +314,21 @@ wait(void)
   }
 }
 
+// funcion que agrega tickets al total cuando un proceso pasa a estar runnable
+int
+lottery_total(void)
+{
+  struct proc *p;
+  int ticket_suma=0;
+  // for para buscar procesos runnable en ptable.proc y agregar tickets al total
+  for(p = ptable.proc; p <&ptable.proc[NPROC]; p++){
+    if (p->state == RUNNABLE){
+      ticket_suma += p->tickets;
+    }
+  }
+  return ticket_suma;
+
+}
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -324,32 +341,50 @@ void
 scheduler(void)
 {
   struct proc *p;
-  struct cpu *c = mycpu();
-  c->proc = 0;
+  int foundproc = 1;
+  int cuenta = 0;
+  long ticket_ganador = 0;
+  int no_total_tickets = 0;
   
   for(;;){
     // Enable interrupts on this processor.
     sti();
+    if (!foundproc);
+    foundproc = 0;
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    ticket_ganador = 0;
+    cuenta = 0;
+    no_total_tickets = 0;
+
+    //utilizamos la funcion lottery_total() para ver la cantidad total de tickets
+    no_total_tickets = lottery_total();
+
+    //ahora elegimos un numero de ticket existente al azar
+    ticket_ganador = random_at_most(no_total_tickets);
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
+        continue;
+      
+      if ((cuenta + p->tickets) < ticket_ganador)
+        cuenta += p->tickets;
         continue;
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = p;
+      foundproc = 1;
       switchuvm(p);
       p->state = RUNNING;
-
-      swtch(&(c->scheduler), p->context);
+      swtch( &cpu->scheduler, p->context);
       switchkvm();
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
-      c->proc = 0;
+      proc = 0;
+      break;
     }
     release(&ptable.lock);
 
@@ -371,15 +406,15 @@ sched(void)
 
   if(!holding(&ptable.lock))
     panic("sched ptable.lock");
-  if(mycpu()->ncli != 1)
+  if(cpu->ncli != 1)
     panic("sched locks");
   if(p->state == RUNNING)
     panic("sched running");
   if(readeflags()&FL_IF)
     panic("sched interruptible");
-  intena = mycpu()->intena;
-  swtch(&p->context, mycpu()->scheduler);
-  mycpu()->intena = intena;
+  intena = cpu->intena;
+  swtch(&p->context, cpu->scheduler);
+  cpu->intena = intena;
 }
 
 // Give up the CPU for one scheduling round.
@@ -524,7 +559,7 @@ procdump(void)
       state = states[p->state];
     else
       state = "???";
-    cprintf("%d %s %s", p->pid, state, p->name);
+    cprintf("%d %s %s %d", p->pid, state, p->name, p->tickets);
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context->ebp+2, pc);
       for(i=0; i<10 && pc[i] != 0; i++)
@@ -541,16 +576,17 @@ cps()
   sti();
   // ciclo for para recorrer la tabla de procesos 
   acquire(&ptable.lock);
-  cprintf("NOMBRE \t PID \t ESTADO \t \n");
+  cprintf("NOMBRE \t PID \t ESTADO \t TICKETS \n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if (p->state == SLEEPING)
-      cprintf("%s \t %d  \t SLEEPING \n", p->name , p->pid);
+      cprintf("%s \t %d  \t SLEEPING  \t %d \n", p->name , p->pid, p->tickets);
     else if (p->state == RUNNING)
-      cprintf("%s \t %d  \t RUNNING \n", p->name , p->pid);
+      cprintf("%s \t %d  \t RUNNING  \t %d  \n", p->name , p->pid, p->tickets);
       else if (p->state == RUNNABLE)
-        cprintf("%s \t %d  \t RUNNABLE \n", p->name , p->pid);
+        cprintf("%s \t %d  \t RUNNABLE  \t %d  \n", p->name , p->pid, p->tickets);
 
   }
   release(&ptable.lock);
   return 22;
 }
+

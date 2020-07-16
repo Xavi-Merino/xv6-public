@@ -89,8 +89,23 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
 int
 sys_cps(void)
 {
   return cps();
+}
+
+int
+sys_settickets(void)
+{
+  int ticket_number;
+  if (argint(0, &ticket_number) < 0){
+    proc->tickets = 15;
+  }
+  else{
+    proc->tickets = ticket_number;
+  }
+  return 0;
+
 }
